@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: veritasai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: veritasai
+      POSTGRES_USER: veritasai
+      POSTGRES_PASSWORD: veritasai
+    ports:
+      - "5432:5432"
+    volumes:
+      - veritasai_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U veritasai -d veritasai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  veritasai_postgres_data:

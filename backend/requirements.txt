@@ -1,0 +1,20 @@
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+pydantic==2.11.7
+email-validator==2.2.0
+
+# Persistence
+SQLAlchemy==2.0.43
+psycopg[binary]==3.2.9
+alembic==1.16.4
+
+# OAuth/session support
+Authlib==1.6.1
+itsdangerous==2.2.0
+argon2-cffi==25.1.0
+httpx==0.28.1
+
+# Analysis
+Torch==2.8.0
+Transformers==4.55.4
+tokenizers==0.21.4
