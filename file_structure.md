@@ -1,1200 +1,863 @@
-VeritasAI — Actual Project Structure
+# VeritasAI — File Structure Reference
 
-This document is based on the VeritasAI files and project structure you actually shared during development.
+This document explains the repository tree and the purpose of each important file.
 
-It is intentionally different from a generic/template structure: the backend modules, frontend components, routes, and support files below reflect the project you have been working with.
+---
 
-1. Complete Project Structure
+# 1. Root
 
-type2/
-│
+```text
+VeritasAI_callus_type2-main/
+├── .gitattributes
+├── .gitignore
+├── README.md
+├── START_HERE.md
+├── AUTH_SETUP.md
+├── DATABASE_SETUP.md
+├── TEAM_GIT.md
+├── architecture.md
+├── file_structure.md
+├── installation.md
+├── docker-compose.yml
 ├── backend/
-│   │
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   │
-│   │   ├── api/
-│   │   │   ├── __init__.py
-│   │   │   └── routes.py
-│   │   │
-│   │   └── analysis/
-│   │       ├── __init__.py
-│   │       ├── text.py
-│   │       ├── pipeline.py
-│   │       ├── perplexity.py
-│   │       ├── burstiness.py
-│   │       ├── tropes.py
-│   │       ├── features.py
-│   │       ├── evidence.py
-│   │       └── scoring.py
-│   │
-│   ├── tests/
-│   │   └── test_pipeline.py
-│   │
-│   ├── requirements.txt
-│   ├── Dockerfile
-│   ├── .env.example
-│   ├── README.md
-│   ├── request.json
-│   ├── response.json
-│   ├── test_pipeline.py
-│   └── .venv/
-│
-├── frontend/
-│   │
-│   ├── app/
-│   │   ├── layout.tsx
-│   │   ├── globals.css
-│   │   │
-│   │   ├── page.tsx
-│   │   │
-│   │   ├── dataset/
-│   │   │   └── page.tsx
-│   │   │
-│   │   ├── evaluation/
-│   │   │   └── page.tsx
-│   │   │
-│   │   ├── limitations/
-│   │   │   └── page.tsx
-│   │   │
-│   │   └── methodology/
-│   │       └── page.tsx
-│   │
-│   ├── components/
-│   │   ├── Navbar.tsx
-│   │   ├── Footer.tsx
-│   │   ├── EssayInputView.tsx
-│   │   ├── LoadingStateView.tsx
-│   │   ├── AnalysisResultsView.tsx
-│   │   ├── DatasetView.tsx
-│   │   ├── EvaluationView.tsx
-│   │   ├── LimitationsView.tsx
-│   │   └── MethodologyView.tsx
-│   │
-│   ├── lib/
-│   │   ├── analysisService.ts
-│   │   ├── analyzer.ts
-│   │   ├── mockData.ts
-│   │   ├── samples.ts
-│   │   ├── scoring.ts
-│   │   └── types.ts
-│   │
-│   ├── public/
-│   │
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── tsconfig.json
-│   ├── postcss.config.js
-│   └── next.config.*
-│
-├── README.md
-├── INSTALLATION.md
-├── START_VERITASAI.md
-├── FILE_STRUCTURE.md
-└── .gitignore
+└── frontend/
+```
 
-2. Important Correction From the Earlier Structure
+---
 
-The earlier structure was too generic.
+# 2. Backend
 
-Your actual backend has additional analysis modules:
-
-burstiness.py
-evidence.py
-scoring.py
-tropes.py
-
-and your frontend has dedicated views for:
-
-Dataset
-Evaluation
-Limitations
-Methodology
-
-Your frontend also uses a lib/ layer for:
-
-analysisService
-analyzer
-mockData
-samples
-scoring
-types
-
-So this structure should be used for your documentation rather than the previous generic version.
-
-3. Backend
-
+```text
 backend/
-├── app/
-├── tests/
-├── requirements.txt
-├── Dockerfile
 ├── .env.example
-├── README.md
+├── alembic.ini
+├── requirements.txt
 ├── request.json
 ├── response.json
+│
+├── alembic/
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions/
+│       ├── .gitkeep
+│       ├── 0001_initial.py
+│       └── 0002_credentials.py
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── models.py
+│   │
+│   ├── analysis/
+│   ├── api/
+│   ├── auth/
+│   ├── core/
+│   └── db/
+│
+├── test_bytes.py
+├── test_mutation.py
 ├── test_pipeline.py
-└── .venv/
+└── test_text.py
+```
 
-The backend is the statistical analysis engine and API server.
+---
 
-Main technologies:
+# 3. Backend Root Files
 
-Python
+## `.env.example`
+
+Template for backend environment variables.
+
+Contains configuration placeholders such as:
+
+```text
+Database
+Model
+Session
+Frontend URL
+OAuth
+```
+
+Never replace this with real secrets.
+
+---
+
+## `requirements.txt`
+
+Python dependency list.
+
+Includes the project's:
+
+```text
 FastAPI
-Pydantic
+Uvicorn
+SQLAlchemy
+Psycopg
+Alembic
+Authlib
+Argon2
+HTTPX
 PyTorch
 Transformers
-Uvicorn
+```
 
-4. Backend Application
+---
 
+## `alembic.ini`
+
+Alembic configuration.
+
+Used for:
+
+```bash
+alembic upgrade head
+alembic revision
+alembic downgrade
+```
+
+---
+
+## `request.json`
+
+Sample API request for manual testing.
+
+---
+
+## `response.json`
+
+Sample/recorded API response for development/testing.
+
+---
+
+# 4. Backend App
+
+```text
 backend/app/
 ├── __init__.py
 ├── main.py
 ├── models.py
+├── analysis/
 ├── api/
-└── analysis/
+├── auth/
+├── core/
+└── db/
+```
 
-main.py
+---
 
-Creates the FastAPI application.
+# 5. `main.py`
+
+FastAPI application entry point.
 
 Responsibilities:
 
-Create the FastAPI app.
+```text
+Create app
+Configure middleware
+Configure CORS
+Configure sessions
+Register routes
+Expose health endpoint
+```
 
-Configure CORS.
+Run:
 
-Register API routes.
+```bash
+python -m uvicorn app.main:app --reload
+```
 
-Expose the health endpoint.
+---
 
-Main health endpoint:
+# 6. `models.py`
 
-GET /health
+Pydantic request/response models.
 
-Expected response:
+Used to define API contracts.
 
-{
-  "status": "ok",
-  "service": "veritasai"
-}
+---
 
-5. Backend API
+# 7. Analysis Directory
 
-backend/app/api/
-├── __init__.py
-└── routes.py
-
-routes.py
-
-Contains the HTTP API endpoint for essay analysis.
-
-Main endpoint:
-
-POST /api/analyze
-
-Request format:
-
-{
-  "essay": "Your essay...",
-  "model_id": "custom"
-}
-
-The route passes the essay into:
-
-analyze_essay()
-
-from:
-
-app.analysis.pipeline
-
-The API layer handles HTTP concerns.
-
-The statistical analysis remains in the analysis package.
-
-6. Backend Data Models
-
-backend/app/models.py
-
-Contains the Pydantic data models.
-
-The important models you currently use include:
-
-PassageSignal
-SentenceAnalysis
-SignalDistribution
-AnalyzeRequest
-AnalysisResult
-
-Conceptually:
-
-AnalyzeRequest
-│
-├── essay
-└── model_id
-
-The output:
-
-AnalysisResult
-│
-├── id
-├── title
-├── processedAt
-├── rawText
-├── wordCount
-├── sentenceCount
-├── readingTimeMinutes
-├── analysisComplexity
-├── reviewPriority
-├── distribution
-├── sentences[]
-└── summaryMessage
-
-7. Backend Analysis Package
-
+```text
 backend/app/analysis/
 ├── __init__.py
-├── text.py
-├── pipeline.py
-├── perplexity.py
 ├── burstiness.py
-├── tropes.py
-├── features.py
 ├── evidence.py
-└── scoring.py
+├── features.py
+├── perplexity.py
+├── pipeline.py
+├── scoring.py
+├── text.py
+└── tropes.py
+```
 
-This is the core of VeritasAI.
+---
 
-8. text.py
+## `text.py`
 
-app/analysis/text.py
+Text processing:
 
-Responsible for text processing.
-
-It contains functionality for:
-
+```text
+Normalization
+Sentence extraction
 Word tokenization
-Text normalization
-Paragraph handling
-Sentence boundary detection
-Sentence extraction
-Word counting
-Character counting
-Reading-time calculation
-Document complexity
+Paragraph indexing
+Character spans
+```
 
-Important functions include:
+---
 
-tokenize_words()
-normalize_word()
-normalize_text()
-split_paragraphs()
-_sentence_spans()
-split_sentences()
-_paragraph_index_at()
-extract_sentences()
-count_words()
-count_characters()
-reading_time_minutes()
-analysis_complexity()
+## `features.py`
 
-Sentence flow
+Lexical and repetition features.
 
-Raw essay
-     │
-     ▼
-normalize_text()
-     │
-     ▼
-_sentence_spans()
-     │
-     ▼
-Direct sentence slices
-     │
-     ▼
-tokenize_words()
-     │
-     ▼
-Sentence objects
+Examples:
 
-A major implementation rule in your project is that sentence text should not be reconstructed by joining tokenized words.
+```text
+Vocabulary diversity
+TTR
+Repeated words
+Repeated n-grams
+```
 
-9. pipeline.py
+---
 
-app/analysis/pipeline.py
+## `perplexity.py`
 
-This is the main orchestration module.
+Language-model perplexity/smoothness calculations.
 
-Main function:
+Uses:
 
-analyze_essay()
-
-It coordinates the complete analysis process.
-
-Essay
- │
- ▼
-Validation
- │
- ▼
-Sentence extraction
- │
- ▼
-Document statistics
- │
- ▼
-Feature extraction
- │
- ▼
-Sentence analysis
- │
- ├── Perplexity
- ├── Burstiness
- ├── Tropes
- └── Lexical predictability
- │
- ▼
-Signal aggregation
- │
- ▼
-Distribution
- │
- ▼
-Review priority
- │
- ▼
-Summary
- │
- ▼
-AnalysisResult
-
-10. perplexity.py
-
-app/analysis/perplexity.py
-
-Provides language-model-based perplexity analysis.
-
-Your implementation uses:
-
+```text
 PyTorch
 Transformers
+```
 
-The module calculates token-level language-model predictability and converts it into a diagnostic signal.
+Default model:
 
-It should be interpreted as statistical evidence, not as proof of human or AI authorship.
+```text
+distilgpt2
+```
 
-11. burstiness.py
+---
 
-app/analysis/burstiness.py
+## `burstiness.py`
 
-Analyzes sentence-length variation and sentence rhythm.
+Sentence-length/rhythm analysis.
 
-The sentence is compared with the document's sentence-length distribution.
+---
 
-Conceptually:
+## `tropes.py`
 
-Sentence lengths
-       │
-       ▼
-Essay-level statistics
-       │
-       ▼
-Sentence comparison
-       │
-       ▼
-Burstiness signal
+Formulaic phrase detection.
 
-12. tropes.py
+---
 
-app/analysis/tropes.py
+## `evidence.py`
 
-Handles formulaic phrasing / configured trope detection.
+Converts signals into diagnostic evidence and explanations.
 
-The module can identify configured phrases and return supporting diagnostic information.
+---
 
-The result is represented as one of the sentence-level signals.
+## `scoring.py`
 
-13. features.py
+Central scoring logic.
 
-app/analysis/features.py
+Contains:
 
-Extracts general statistical and linguistic features.
+```text
+Signal normalization
+Weighted scoring
+Flag thresholds
+Distribution
+Review priority
+```
 
-The project uses this module for measurements such as:
+---
 
-Word statistics
-Sentence lengths
-Function-word ratio
-Punctuation density
-Punctuation counts
-Contraction count
-Contraction rate
-Lexical predictability
-N-gram-related features
+## `pipeline.py`
 
-These features provide supporting evidence for the diagnostic pipeline.
+Main analysis orchestrator.
 
-14. evidence.py
+It combines all analysis modules.
 
-app/analysis/evidence.py
+---
 
-Converts calculated statistics into evidence that can be displayed to the user.
+# 8. API Directory
 
-It contributes to:
+```text
+backend/app/api/
+├── __init__.py
+├── dependencies.py
+└── routes.py
+```
 
-Signal titles
-Metric values
-Categories
-Descriptions
-Explanations
+## `routes.py`
 
-The frontend uses the resulting signal information in the evidence panel.
+Main application endpoints.
 
-15. scoring.py
+Includes:
 
-app/analysis/scoring.py
+```text
+/api/analyze
+/api/essays
+```
 
-Contains scoring-related logic used by the analysis system.
+---
 
-It is responsible for helping convert statistical measurements into the diagnostic scoring framework.
+## `dependencies.py`
 
-The important distinction is:
+Reusable FastAPI dependencies.
 
-raw statistical measurement
-          │
-          ▼
-diagnostic score
-          │
-          ▼
-signal / flag level
+Examples:
 
-16. Backend Tests
+```text
+Database session
+Authenticated user
+```
 
-Your project contains:
+---
 
-backend/tests/
-└── test_pipeline.py
+# 9. Auth Directory
 
-and also a root-level:
+```text
+backend/app/auth/
+├── __init__.py
+├── routes.py
+└── service.py
+```
 
-backend/test_pipeline.py
+## `routes.py`
 
-The root-level script has been used extensively during your manual debugging and verification.
+Authentication endpoints.
 
-The tests/scripts have been used to verify:
+```text
+register
+login
+logout
+current user
+Google OAuth
+GitHub OAuth
+```
 
-Sentence extraction
-Pipeline execution
-Raw text preservation
-Sentence text integrity
-API response structure
+## `service.py`
 
-17. Backend Configuration
+Authentication implementation:
 
-requirements.txt
+```text
+Password hashing
+Password verification
+OAuth
+User creation/upsert
+Session handling
+```
 
-Contains the Python dependencies.
+---
 
-The important packages currently include:
+# 10. Core Directory
 
-fastapi
-uvicorn
-pydantic
-torch
-transformers
-tokenizers
+```text
+backend/app/core/
+└── config.py
+```
 
-Install:
+Central application configuration.
 
-python -m pip install -r requirements.txt
+Reads environment variables.
 
-Dockerfile
+---
 
-Provides a containerization configuration for the backend.
+# 11. Database Directory
 
-This is useful for:
+```text
+backend/app/db/
+├── __init__.py
+├── base.py
+├── models.py
+└── session.py
+```
 
-Deployment
-Reproducible environments
-Container-based execution
+## `base.py`
 
-.env.example
+SQLAlchemy declarative base.
 
-Contains example environment configuration.
+## `models.py`
 
-Do not put real secrets into:
+Database entities.
 
-.env.example
+## `session.py`
 
-Use a local .env for actual private configuration when required.
+Engine and session factory.
 
-18. .venv
+---
 
-backend/.venv/
+# 12. Alembic
 
-This is the local Python virtual environment.
+```text
+backend/alembic/
+├── env.py
+├── script.py.mako
+└── versions/
+```
 
-It contains installed packages such as:
+Used for database schema evolution.
 
-torch
-transformers
-fastapi
-uvicorn
-pydantic
+Current migration chain:
 
-It should not normally be committed to Git.
+```text
+0001_initial
+      ↓
+0002_credentials
+```
 
-Use:
+---
 
-source .venv/bin/activate
+# 13. Backend Tests
 
-on macOS/Linux.
+```text
+test_pipeline.py
+test_text.py
+test_bytes.py
+test_mutation.py
+```
 
-19. Frontend
+Purpose:
 
-Your frontend is a Next.js application.
+```text
+Pipeline behavior
+Text processing
+Byte-level checks
+Mutation/regression checks
+```
 
-Based on the files you shared, the frontend is organized into:
+---
 
+# 14. Frontend
+
+```text
 frontend/
-├── app/
-├── components/
-├── lib/
-├── public/
+├── .env.example
 ├── package.json
 ├── package-lock.json
-├── tsconfig.json
+├── next-env.d.ts
 ├── postcss.config.js
-└── next.config.*
-
-Technology stack:
-
-Next.js
-React
-TypeScript
-Tailwind CSS
-Lucide React
-
-Your package configuration currently uses:
-
-Next.js 14.x
-React 18.x
-TypeScript 5.x
-Tailwind CSS 3.x
-
-20. Frontend App Router
-
-The frontend uses the Next.js App Router.
-
-frontend/app/
-├── layout.tsx
-├── globals.css
-├── page.tsx
-├── dataset/
-│   └── page.tsx
-├── evaluation/
-│   └── page.tsx
-├── limitations/
-│   └── page.tsx
-└── methodology/
-    └── page.tsx
-
-21. Main Frontend Page
-
-app/page.tsx
-
-This is the main VeritasAI analysis page.
-
-It manages the main UI states:
-
-input
-loading
-results
-
-The page imports:
-
-EssayInputView
-LoadingStateView
-AnalysisResultsView
-analysisService
-mockData
-types
-
-The flow is:
-
-Essay Input
-     │
-     ▼
-Run Analysis
-     │
-     ▼
-Loading
-     │
-     ▼
-API Request
-     │
-     ▼
-Analysis Result
-     │
-     ▼
-Results View
-
-22. Frontend Routes
-
-Home
-
-/
-
-Main essay analysis interface.
-
-Dataset
-
-/dataset
-
-Uses:
-
-DatasetView
-
-Purpose:
-
-Dataset / evaluation information
-
-Evaluation
-
-/evaluation
-
-Uses:
-
-EvaluationView
-
-Purpose:
-
-Evaluation methodology
-Performance / diagnostic evaluation
-
-Limitations
-
-/limitations
-
-Uses:
-
-LimitationsView
-
-Purpose:
-
-System limitations
-Responsible interpretation
-
-Methodology
-
-/methodology
-
-Uses:
-
-MethodologyView
-
-Purpose:
-
-Explain how VeritasAI performs its statistical analysis
-
-23. Frontend Components
-
-frontend/components/
-├── Navbar.tsx
-├── Footer.tsx
-├── EssayInputView.tsx
-├── LoadingStateView.tsx
-├── AnalysisResultsView.tsx
-├── DatasetView.tsx
-├── EvaluationView.tsx
-├── LimitationsView.tsx
-└── MethodologyView.tsx
-
-24. EssayInputView.tsx
-
-Responsible for the essay-entry interface.
-
-Conceptually:
-
-EssayInputView
-│
-├── Essay text area
-├── Input controls
-└── Run Analysis
-
-The component passes the essay back to the main page.
-
-25. LoadingStateView.tsx
-
-Displays the analysis/loading state while the backend request is being processed.
-
-Flow:
-
-Run Analysis
-     │
-     ▼
-LoadingStateView
-     │
-     ▼
-Backend analysis
-     │
-     ▼
-Results
-
-26. AnalysisResultsView.tsx
-
-Displays the main analysis dashboard.
-
-It contains the result presentation including:
-
-Diagnostic Overview
-Review Priority
-Overall Signal Distribution
-Document Passages
-Sentence scores
-Signal evidence
-
-The UI can show individual signals such as:
-
-Perplexity
-Burstiness
-Formulaic phrasing
-Lexical predictability
-
-27. DatasetView.tsx
-
-Displays dataset-related information.
-
-Route:
-
-/dataset
-
-28. EvaluationView.tsx
-
-Displays evaluation information.
-
-Route:
-
-/evaluation
-
-29. LimitationsView.tsx
-
-Displays limitations and responsible-use information.
-
-Route:
-
-/limitations
-
-30. MethodologyView.tsx
-
-Displays the methodology behind the VeritasAI diagnostic framework.
-
-Route:
-
-/methodology
-
-31. Navbar.tsx
-
-Provides navigation across the application.
-
-It connects the main interface with pages such as:
-
-Dashboard
-Dataset
-Evaluation
-Methodology
-Limitations
-
-32. Footer.tsx
-
-Contains the bottom-level application navigation/information.
-
-It is used for links such as:
-
-Privacy Policy
-Terms of Service
-Ethical AI Charter
-
-33. Frontend lib/
-
-frontend/lib/
-├── analysisService.ts
-├── analyzer.ts
-├── mockData.ts
-├── samples.ts
-├── scoring.ts
-└── types.ts
-
-This layer contains application logic, API communication, shared types, sample data, and scoring helpers.
-
-34. analysisService.ts
-
-Responsible for communication between the frontend and backend analysis API.
-
-Conceptually:
-
-Frontend
-   │
-   ▼
-analyzeEssay()
-   │
-   ▼
-POST /api/analyze
-   │
-   ▼
-FastAPI
-
-This keeps API communication separate from UI components.
-
-35. types.ts
-
-Contains shared TypeScript types used by the frontend.
-
-The frontend uses these types to represent the backend response.
-
-Conceptually:
-
-AnalysisResult
-├── document metadata
-├── distribution
-└── sentences[]
-    ├── signal score
-    ├── flag level
-    └── signals[]
-
-36. mockData.ts
-
-Contains demo/mock analysis data used by the frontend.
-
-The main page has used demo result data during development.
-
-This allows the interface to display a complete analysis dashboard even before a live API request is completed.
-
-37. samples.ts
-
-Contains sample essay or diagnostic data used for development/testing/demo purposes.
-
-38. analyzer.ts
-
-Contains frontend-side analyzer/helper logic used by the application.
-
-This should remain separate from:
-
-analysisService.ts
-
-because API communication and local analysis/helper logic are different responsibilities.
-
-39. scoring.ts
-
-Contains frontend scoring/helper logic.
-
-This should be kept separate from the backend scoring module:
-
-backend/app/analysis/scoring.py
-
-The backend is the authoritative location for server-side analysis.
-
-40. Frontend Configuration
-
-package.json
-package-lock.json
-tsconfig.json
-postcss.config.js
-next.config.*
-
-package.json
+├── tailwind.config.ts
+├── tsconfig.json
+├── README.md
+├── app/
+├── components/
+└── lib/
+```
+
+---
+
+# 15. Frontend Configuration
+
+## `package.json`
 
 Defines:
 
+```text
+Scripts
 Dependencies
-Development dependencies
-npm scripts
+Project metadata
+```
 
-Current important scripts:
+Important commands:
 
+```bash
 npm run dev
 npm run build
 npm run start
-npm run lint
+```
 
-tsconfig.json
+---
 
-TypeScript configuration.
+## `tailwind.config.ts`
 
-The project uses the alias:
+Tailwind configuration.
 
-@/*
+---
 
-which maps to the frontend project root.
+## `postcss.config.js`
 
-This is why imports such as:
+PostCSS configuration.
 
-import { EssayInputView } from "@/components/EssayInputView";
+---
 
-work.
+## `tsconfig.json`
 
-41. CSS
+TypeScript compiler configuration.
 
-frontend/app/globals.css
+---
 
-Contains global styles for the application.
+## `.env.example`
 
-The project also uses Tailwind CSS.
+Frontend environment template.
 
-42. PostCSS
+---
 
-frontend/postcss.config.js
+# 16. Frontend App Directory
 
-Provides PostCSS configuration used by the frontend build.
+```text
+frontend/app/
+├── page.tsx
+├── globals.css
+├── layout.tsx
+├── dataset/
+├── evaluation/
+├── limitations/
+├── methodology/
+└── logout/
+```
 
-43. public/
+---
 
-frontend/public/
+## `page.tsx`
 
-Contains static frontend assets.
+Main application page/controller.
 
-Examples may include:
+Coordinates:
 
-icons
-images
-logos
-static files
-
-44. Full Data Flow
-
-The actual project flow is:
-
-┌─────────────────────────────┐
-│          User               │
-│     Enters an essay         │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│       EssayInputView        │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│         page.tsx            │
-│     input → loading         │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│     analysisService.ts      │
-└──────────────┬──────────────┘
-               │
-               │ POST /api/analyze
-               ▼
-┌─────────────────────────────┐
-│       FastAPI routes.py     │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│       pipeline.py           │
-└──────────────┬──────────────┘
-               │
-       ┌───────┼────────┐
-       │       │        │
-       ▼       ▼        ▼
-    text.py  features  scoring
-       │       │        │
-       └───────┼────────┘
-               │
-       ┌───────┼──────────────┐
-       ▼       ▼       ▼      ▼
- perplexity burstiness tropes evidence
-       │       │       │      │
-       └───────┴───────┴──────┘
-               │
-               ▼
-       AnalysisResult
-               │
-               ▼
-        JSON API response
-               │
-               ▼
-       AnalysisResultsView
-               │
-               ▼
-          User dashboard
-
-45. Backend vs Frontend Responsibilities
-
-Backend
-
-The backend should own:
-
-Text normalization
-Sentence extraction
-Tokenization
-Statistical features
-Perplexity
-Burstiness
-Formulaic phrasing
-Scoring
-Evidence generation
-Review priority
-Final analysis result
-
-Frontend
-
-The frontend should own:
-
+```text
+Authentication
 Essay input
-Loading state
-API communication
-Result visualization
+Analysis
+Results
+History
 Navigation
-Dashboard presentation
-Methodology page
-Evaluation page
-Limitations page
-Dataset page
+```
 
-This separation is important.
+---
 
-The frontend should not independently recreate the backend's statistical analysis.
+## `layout.tsx`
 
-46. Development Environment
+Root Next.js layout.
 
-Backend
+---
 
-Python 3.11
-FastAPI
-Uvicorn
-PyTorch 2.8.0
-Transformers 4.55.4
-Pydantic 2.11.7
+## `globals.css`
 
-Frontend
+Global styles.
 
-Next.js 14.x
-React 18.x
-TypeScript 5.x
-Tailwind CSS 3.x
-Lucide React
+---
 
-47. Local Startup
+# 17. Frontend Pages
 
-Backend
+## `dataset/page.tsx`
 
-cd "/Users/srinjoy/Desktop/callus hackthon/type2/backend"
-source .venv/bin/activate
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Dataset page.
 
-Backend:
+## `evaluation/page.tsx`
 
-http://127.0.0.1:8000
+Evaluation page.
 
-API documentation:
+## `limitations/page.tsx`
 
-http://127.0.0.1:8000/docs
+Limitations page.
 
-Frontend
+## `methodology/page.tsx`
 
-cd "/Users/srinjoy/Desktop/callus hackthon/type2/frontend"
-npm install
-npm run dev
+Methodology page.
 
-Frontend:
+## `logout/logout_page.tsx`
 
-http://localhost:3000
+Logout page component.
 
-48. Git Ignore
+---
 
-The following should normally be ignored:
+# 18. Components
 
-# Python
-.venv/
-__pycache__/
-*.pyc
+```text
+frontend/components/
+├── AnalysisResultsView.tsx
+├── AppShell.tsx
+├── DatasetView.tsx
+├── EssayInputView.tsx
+├── EvaluationView.tsx
+├── Footer.tsx
+├── LimitationsView.tsx
+├── LoadingStateView.tsx
+├── LoginPage.tsx
+├── MethodologyView.tsx
+├── Navbar.tsx
+└── ThemeToggle.tsx
+```
 
-# Next.js
-.next/
-node_modules/
+---
 
-# Environment
-.env
-.env.*
+## `EssayInputView.tsx`
 
-# Local generated files
-response.json
+Essay entry UI.
 
-# OS
-.DS_Store
+---
 
-Do not commit private essay submissions or generated analysis results containing user data.
+## `AnalysisResultsView.tsx`
 
-49. Documentation Files
+Analysis results UI.
 
-The project documentation should be organized as:
+---
 
-type2/
-├── README.md
-├── INSTALLATION.md
-├── START_VERITASAI.md
-└── FILE_STRUCTURE.md
+## `LoginPage.tsx`
 
+Login/register UI.
+
+---
+
+## `AppShell.tsx`
+
+Application shell/layout behavior.
+
+---
+
+## `Navbar.tsx`
+
+Main navigation.
+
+---
+
+## `ThemeToggle.tsx`
+
+Theme switch.
+
+---
+
+## `LoadingStateView.tsx`
+
+Loading state while analysis is running.
+
+---
+
+## `EvaluationView.tsx`
+
+Detector evaluation interface.
+
+---
+
+## `DatasetView.tsx`
+
+Dataset interface.
+
+---
+
+## `MethodologyView.tsx`
+
+Explains detector methodology.
+
+---
+
+## `LimitationsView.tsx`
+
+Explains limitations and responsible use.
+
+---
+
+## `Footer.tsx`
+
+Footer UI.
+
+---
+
+# 19. Frontend Library
+
+```text
+frontend/lib/
+├── analysisService.ts
+├── analyzer.ts
+├── authService.ts
+├── essayService.ts
+├── mockData.ts
+├── samples.ts
+└── types.ts
+```
+
+---
+
+## `analysisService.ts`
+
+Backend analysis API client.
+
+Calls:
+
+```http
+POST /api/analyze
+```
+
+---
+
+## `authService.ts`
+
+Authentication API client.
+
+---
+
+## `essayService.ts`
+
+Saved essay API client.
+
+---
+
+## `types.ts`
+
+TypeScript interfaces/types for API data.
+
+---
+
+## `analyzer.ts`
+
+Frontend-side analysis/helper functionality.
+
+---
+
+## `mockData.ts`
+
+Development/mock data.
+
+---
+
+## `samples.ts`
+
+Sample essay content.
+
+---
+
+# 20. Root Docker Compose
+
+```text
+docker-compose.yml
+```
+
+Provides the local PostgreSQL development service.
+
+Start:
+
+```bash
+docker compose up -d postgres
+```
+
+---
+
+# 21. Where to Look for Common Changes
+
+## Change detector score
+
+```text
+backend/app/analysis/scoring.py
+```
+
+## Change perplexity
+
+```text
+backend/app/analysis/perplexity.py
+```
+
+## Change sentence parsing
+
+```text
+backend/app/analysis/text.py
+```
+
+## Add a new detector signal
+
+```text
+backend/app/analysis/
+```
+
+Then integrate it in:
+
+```text
+pipeline.py
+scoring.py
+evidence.py
+```
+
+## Add API endpoint
+
+```text
+backend/app/api/routes.py
+```
+
+## Change authentication
+
+```text
+backend/app/auth/
+```
+
+## Change database schema
+
+```text
+backend/app/db/models.py
+backend/alembic/versions/
+```
+
+## Change analysis dashboard
+
+```text
+frontend/components/AnalysisResultsView.tsx
+```
+
+## Change essay input
+
+```text
+frontend/components/EssayInputView.tsx
+```
+
+## Change login UI
+
+```text
+frontend/components/LoginPage.tsx
+```
+
+## Change API client
+
+```text
+frontend/lib/
+```
+
+---
+
+# 22. Architecture Summary
+
+```text
+                 VERITASAI
+                     │
+       ┌─────────────┴─────────────┐
+       │                           │
+   FRONTEND                    BACKEND
+       │                           │
+   Next.js                     FastAPI
+       │                           │
+ Components                  API / Auth
+       │                           │
+ Service Layer              Analysis Pipeline
+       │                           │
+       │                  ┌────────┼────────┐
+       │                  │        │        │
+       │              Perplexity  Text   Scoring
+       │                           │
+       │                       Evidence
+       │                           │
+       └───────────────────────────┤
+                                   ▼
+                              PostgreSQL
+```
+
+---
+
+# 23. Important Files for a New Developer
+
+If you only have time to inspect ten files:
+
+```text
 README.md
+START_HERE.md
+backend/app/main.py
+backend/app/analysis/pipeline.py
+backend/app/analysis/scoring.py
+backend/app/analysis/text.py
+backend/app/api/routes.py
+backend/app/auth/routes.py
+frontend/app/page.tsx
+frontend/components/AnalysisResultsView.tsx
+```
 
-Complete project overview.
-
-INSTALLATION.md
-
-Installation instructions for:
-
-macOS
-Windows
-Python environment
-Node.js environment
-Dependencies
-
-START_VERITASAI.md
-
-Quick startup instructions.
-
-FILE_STRUCTURE.md
-
-This document.
-
-50. Final Actual Architecture
-
-                         VERITASAI
-                            │
-              ┌─────────────┴─────────────┐
-              │                           │
-          FRONTEND                     BACKEND
-              │                           │
-          Next.js                     FastAPI
-              │                           │
-       ┌──────┼──────┐                    │
-       │      │      │                    ▼
-      App Components Lib              API Routes
-       │      │      │                    │
-       │      │      └──────────────┐     ▼
-       │      │                     │  Pipeline
-       │      │                     │     │
-       │      │                     │     ├── Text
-       │      │                     │     ├── Features
-       │      │                     │     ├── Perplexity
-       │      │                     │     ├── Burstiness
-       │      │                     │     ├── Tropes
-       │      │                     │     ├── Evidence
-       │      │                     │     └── Scoring
-       │      │                     │
-       │      └─────────────────────┘
-       │
-       ▼
-   Results UI
-       │
-       ▼
-  User-facing diagnostics
-
-This is the structure you should use for the project's technical documentation because it matches the actual VeritasAI modules and frontend views you have shared, rather than assuming files that are not part of your project.
