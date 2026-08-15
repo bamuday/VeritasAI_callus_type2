@@ -1,97 +1,363 @@
-# VeritasAI authentication setup
+# VeritasAI — Authentication Setup
 
-VeritasAI now supports three sign-in paths:
+This document explains the authentication system and how to configure each authentication provider.
 
-1. Email + password (local account)
-2. Google OAuth
-3. GitHub OAuth
+---
 
-Local passwords are never stored in plaintext. They are hashed with Argon2 before being saved in PostgreSQL.
+# 1. Authentication Architecture
 
-## 1. Apply the credential-auth migration
+VeritasAI supports:
 
-From `backend/` with the virtual environment active:
-
-```bash
-alembic upgrade head
+```text
+Email + Password
+Google OAuth
+GitHub OAuth
 ```
 
-This adds `users.password_hash` through migration `0002_credentials`.
+Architecture:
 
-## 2. Local email/password login
+```text
+                         Authentication
+                               │
+              ┌────────────────┼────────────────┐
+              ▼                ▼                ▼
+        Credentials         Google            GitHub
+              │                │                │
+              └────────────────┼────────────────┘
+                               ▼
+                         FastAPI Auth
+                               │
+                               ▼
+                         User / Account
+                               │
+                               ▼
+                       Signed Session
+                               │
+                               ▼
+                          PostgreSQL
+```
 
-Open the app at `http://localhost:3000` and choose **Sign up** to create a local account. After registration, the account is saved in PostgreSQL and the session is created by FastAPI.
+---
 
-After that, the same email/password can be used from the normal Sign In form.
+# 2. Backend Files
 
-You do not need Google or GitHub configuration for this path.
+Authentication code lives in:
 
-## 3. Google login
+```text
+backend/app/auth/
+├── __init__.py
+├── routes.py
+└── service.py
+```
 
-Create a Google OAuth 2.0 **Web application** client in Google Cloud Console. Add this exact authorized redirect URI for local development:
+Configuration:
+
+```text
+backend/app/core/config.py
+```
+
+Database:
+
+```text
+backend/app/db/models.py
+```
+
+---
+
+# 3. Email/Password Authentication
+
+Registration endpoint:
+
+```http
+POST /api/auth/register
+```
+
+Request:
+
+```json
+{
+  "name": "Srinjoy",
+  "email": "user@example.com",
+  "password": "strong-password"
+}
+```
+
+Login:
+
+```http
+POST /api/auth/login
+```
+
+Password handling:
+
+```text
+Plain password
+      ↓
+Argon2 hash
+      ↓
+Database
+```
+
+The plain-text password is not stored.
+
+---
+
+# 4. Password Rules
+
+The current API expects:
+
+```text
+Minimum: 8 characters
+Maximum: 128 characters
+```
+
+Use strong passwords in real deployments.
+
+---
+
+# 5. Current User
+
+Endpoint:
+
+```http
+GET /api/auth/me
+```
+
+The backend reads the current session and returns the authenticated user.
+
+This is used by the frontend to restore authentication state after page refreshes.
+
+---
+
+# 6. Logout
+
+Endpoint:
+
+```http
+POST /api/auth/logout
+```
+
+The backend clears the current authenticated session.
+
+---
+
+# 7. Session Configuration
+
+Backend `.env`:
+
+```env
+SESSION_SECRET=replace-with-a-long-random-secret
+SESSION_HTTPS_ONLY=false
+```
+
+Generate a secure secret:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+For production:
+
+```env
+SESSION_HTTPS_ONLY=true
+```
+
+when the application is served through HTTPS.
+
+---
+
+# 8. Google OAuth
+
+## Create credentials
+
+Create a Google OAuth Web Application.
+
+Use the local callback:
 
 ```text
 http://localhost:8000/api/auth/google/callback
 ```
 
-Google supports local-machine redirect URIs for web-server OAuth testing. Keep the client secret on the backend only. Do not commit it to Git.
+Backend environment:
 
-Put the generated values in `backend/.env`:
-
-```text
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+```env
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google/callback
 ```
 
-Restart FastAPI after editing `.env`.
+---
 
-## 4. GitHub login
-
-Create a GitHub **OAuth App** for the web application flow. Use:
+# 9. Google Flow
 
 ```text
-Application name: VeritasAI Local
-Homepage URL: http://localhost:3000
-Authorization callback URL: http://localhost:8000/api/auth/github/callback
+User clicks Google
+        │
+        ▼
+GET /api/auth/google
+        │
+        ▼
+Google authorization
+        │
+        ▼
+GET /api/auth/google/callback
+        │
+        ▼
+Verify profile
+        │
+        ▼
+Create/find User
+        │
+        ▼
+Create session
+        │
+        ▼
+Redirect frontend
 ```
 
-GitHub's callback URL must match the configured URL for the OAuth application. For the current local setup, use the exact `localhost` URL above.
+---
 
-Put the generated values in `backend/.env`:
+# 10. GitHub OAuth
+
+Create a GitHub OAuth application.
+
+Local configuration:
 
 ```text
-GITHUB_CLIENT_ID=your-github-client-id
-GITHUB_CLIENT_SECRET=your-github-client-secret
+Homepage:
+http://localhost:3000
+```
+
+Callback:
+
+```text
+http://localhost:8000/api/auth/github/callback
+```
+
+Backend `.env`:
+
+```env
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
 GITHUB_REDIRECT_URI=http://localhost:8000/api/auth/github/callback
 ```
 
-Restart FastAPI after editing `.env`.
+---
 
-## 5. Session and secrets
-
-Also set a strong local session secret in `backend/.env`:
+# 11. GitHub Flow
 
 ```text
-SESSION_SECRET=replace-this-with-a-long-random-secret
-SESSION_HTTPS_ONLY=false
+User clicks GitHub
+        │
+        ▼
+GET /api/auth/github
+        │
+        ▼
+GitHub authorization
+        │
+        ▼
+GET /api/auth/github/callback
+        │
+        ▼
+Fetch user profile
+        │
+        ▼
+Create/find User
+        │
+        ▼
+Create session
+        │
+        ▼
+Redirect frontend
 ```
 
-Never commit the real `.env` file.
+---
 
-## 6. Expected local flow
+# 12. Database Authentication Tables
+
+The main tables are:
 
 ```text
-Browser (localhost:3000)
-        |
-        v
-Next.js login UI
-        |
-        +--> Email/password --> FastAPI --> PostgreSQL
-        |
-        +--> Google ---------> Google --> FastAPI --> PostgreSQL
-        |
-        +--> GitHub ---------> GitHub --> FastAPI --> PostgreSQL
+users
+auth_accounts
 ```
 
-After authentication, the user's `user_id` is stored in the signed FastAPI session. Essays and analyses are then associated with that user.
+Conceptually:
+
+```text
+User
+ │
+ ├── Email/password credential
+ │
+ ├── Google account
+ │
+ └── GitHub account
+```
+
+`auth_accounts` stores provider identity information.
+
+---
+
+# 13. Security Rules
+
+Never commit:
+
+```text
+SESSION_SECRET
+GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_SECRET
+DATABASE_URL with production password
+```
+
+Never place OAuth client secrets in:
+
+```text
+NEXT_PUBLIC_*
+```
+
+Frontend variables are exposed to the browser.
+
+---
+
+# 14. OAuth Troubleshooting
+
+If OAuth fails, verify:
+
+```text
+1. Client ID is correct.
+2. Client secret is correct.
+3. Redirect URI matches exactly.
+4. Backend .env is loaded.
+5. FastAPI was restarted.
+6. Frontend URL is correct.
+7. Browser is using localhost consistently.
+```
+
+Avoid mixing:
+
+```text
+localhost
+```
+
+and:
+
+```text
+127.0.0.1
+```
+
+during OAuth testing unless the configured origins/callbacks support both.
+
+---
+
+# 15. Authentication Test Checklist
+
+- [ ] Register a new account.
+- [ ] Try duplicate email registration.
+- [ ] Login with correct password.
+- [ ] Reject incorrect password.
+- [ ] Verify `/api/auth/me`.
+- [ ] Refresh frontend and verify session persists.
+- [ ] Logout.
+- [ ] Verify session is cleared.
+- [ ] Test Google OAuth if configured.
+- [ ] Test GitHub OAuth if configured.
